@@ -7,3 +7,4 @@ services:
     container_name: angular
     ports:
       - '8080:80'
+
