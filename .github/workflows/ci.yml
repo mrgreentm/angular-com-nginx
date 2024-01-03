@@ -1,31 +1,36 @@
-name: angular-ci
+name: CI/CD para Angular no S3
 
 on:
   push:
     branches:
       - main
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: "us-east-1"  # Substitua com sua região AWS
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-    - uses: actions/setup-node@v1 #this installs node and npm for us
+    - name: Checkout do repositório
+      uses: actions/checkout@v2
+
+    - name: Configurar o Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: '18.18.1'
-    - uses: actions/cache@v1
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-    - name: Build
-      run: |
-        npm install
-        npm run build
-    - name: Deploy
-      uses: JamesIves/github-pages-deploy-action@releases/v3
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: dist/fit
+        node-version: 14
+
+    - name: Instalar dependências
+      run: npm install
+
+    - name: Construir a aplicação Angular
+      run: npm run build -- --prod
+
+    - name: Configurar AWS CLI
+      run: aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID && aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY && aws configure set default.region $AWS_DEFAULT_REGION
+
+    - name: Fazer upload para o S3
+      run: aws s3 sync dist/ s3://jacinto-software-deploy-s3
