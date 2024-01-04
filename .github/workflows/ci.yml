@@ -33,4 +33,4 @@ jobs:
       run: aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID && aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY && aws configure set default.region $AWS_DEFAULT_REGION
 
     - name: Fazer upload para o S3
-      run: aws s3 sync dist/ s3://jacinto-software-deploy-s3
+      run: AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION aws s3 sync dist/ s3://jacinto-software-deploy-s3/
